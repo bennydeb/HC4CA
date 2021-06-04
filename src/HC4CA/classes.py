@@ -62,8 +62,20 @@ class Dataset(object):
         return self
 
     def dump(self, **kwargs):
-        time_stamp = datetime.now().strftime("%H%M%S%d%m%y")
-        file = kwargs.pop("file", "DatasetObj_" + time_stamp + ".pkl")
+        """
+
+        :param kwargs:
+        :return:
+        """
+        file_prefix = kwargs.pop("file_prefix", "DatasetObj_")
+        time_stamp = kwargs.pop('time_stamp', True)
+
+        if time_stamp:
+            time = datetime.now().strftime("%H%M%S%d%m%y")
+            file_prefix = file_prefix + time
+
+        file = file_prefix + ".pkl"
+
         with open(file, "wb") as f:
             pickle.dump(self, f)
         return file
@@ -203,17 +215,27 @@ class DataSubset(object):
 
         return grouped.mean()
 
+    # Always adds locations if they exists
     def to_pickle(self, **kwargs):
-        filename = kwargs.pop("filename",
-                              f"../datasubset_{self.subset}.gzip")
+
+        file_prefix = kwargs.pop("file_prefix", "DatasubsetObj_")
+        time_stamp = kwargs.pop('time_stamp', True)
+
+        file = file_prefix + f'_{self.subset}_'
+
+        if time_stamp:
+            time = datetime.now().strftime("%H%M%S%d%m%y")
+            file = file + time
+
+        file = file + ".gzip"
 
         df = self.raw_data.copy()
         if self.locations is not None:
             df = pd.concat([df, self.locations], axis=1)
 
-        df.to_pickle(filename, compression='gzip')
+        df.to_pickle(file, compression='gzip')
 
-        return filename
+        return file
 
     @staticmethod
     def read_pickle(filename):
@@ -241,8 +263,8 @@ class Subject(object):
                     f"{datasubset.subset}/" \
                     f"{subject}"
 
-        self.metadata, self.start, \
-        self.end, self.annotators = None, None, None, None
+        self.metadata, self.start, self.end, self.annotators = \
+            None, None, None, None
         self._index = None
 
         self.load()
@@ -399,8 +421,8 @@ class Subject(object):
         return df
 
     def load(self):
-        self.metadata, self.start, \
-        self.end, self.annotators = self._get_meta()
+        self.metadata, self.start, self.end, self.annotators =\
+            self._get_meta()
         self._index = self._get_index()
 
     def read_location(self):

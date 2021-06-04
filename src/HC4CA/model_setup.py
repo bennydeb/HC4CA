@@ -34,4 +34,5 @@ def model_GridSearchCV(**kwargs):
     clf_GridSearch = GridSearchCV(pipeline, param_grid=pipeline_parameters,
                                   refit=True, verbose=10, **kwargs
                                   )
+    # TODO: Evaluation by label summary
     return clf_GridSearch
