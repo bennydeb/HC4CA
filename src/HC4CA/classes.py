@@ -62,15 +62,27 @@ class Dataset(object):
         return self
 
     def dump(self, **kwargs):
-        time_stamp = datetime.now().strftime("%H%M%S%d%m%y")
-        file = kwargs.pop("file", "DatasetObj_" + time_stamp + ".pkl")
+        """
+
+        :param kwargs:
+        :return:
+        """
+        file_prefix = kwargs.pop("file_prefix", "DatasetObj_")
+        time_stamp = kwargs.pop('time_stamp', True)
+
+        if time_stamp:
+            time = datetime.now().strftime("%H%M%S%d%m%y")
+            file_prefix = file_prefix + time
+
+        file = file_prefix + ".pkl"
+
         with open(file, "wb") as f:
             pickle.dump(self, f)
         return file
 
     @staticmethod
-    def load_from_pickle(file):
-        with open(file, "rb") as f:
+    def load_from_pickle(filename):
+        with open(filename, "rb") as f:
             obj = pickle.load(f)
         return obj
 
@@ -146,13 +158,6 @@ class DataSubset(object):
         return self.locations.copy().insert(0, ('Locations', 'no_label'),
                                             no_label_value)
 
-    def get_only(self, sensors):
-        for sensor in sensors:
-            if sensor not in self.dataset.sensors:
-                raise ValueError(sensor)
-
-        return self.raw_data.loc[(slice(None), sensors)]
-
     def load(self):
         self.subjects = self._get_subjects()
         self.targets = self._has_targets()  # TODO: targets only for train subset
@@ -210,15 +215,44 @@ class DataSubset(object):
 
         return grouped.mean()
 
+    # Always adds locations if they exists
     def to_pickle(self, **kwargs):
-        filename = kwargs.pop("filename",
-                              f"../datasubset_{self.subset}.gzip")
 
-        return self.raw_data.to_pickle(filename, compression='gzip')
+        file_prefix = kwargs.pop("file_prefix", "DatasubsetObj_")
+        time_stamp = kwargs.pop('time_stamp', True)
+
+        file = file_prefix + f'_{self.subset}_'
+
+        if time_stamp:
+            time = datetime.now().strftime("%H%M%S%d%m%y")
+            file = file + time
+
+        file = file + ".gzip"
+
+        df = self.raw_data.copy()
+        if self.locations is not None:
+            df = pd.concat([df, self.locations], axis=1)
+
+        df.to_pickle(file, compression='gzip')
+
+        return file
 
     @staticmethod
     def read_pickle(filename):
         return pd.read_pickle(filename, compression='gzip')
+
+    @staticmethod
+    def read_csv(filename):
+        return pd.read_csv(filename)
+
+    @staticmethod
+    def get_only(df, sensors):
+        df_sensors = set(df.columns.get_level_values(0))
+        for sensor in sensors:
+            if sensor not in df_sensors:
+                raise ValueError(sensor + "not in dataframe")
+
+        return df.loc[(slice(None), sensors)]
 
 
 class Subject(object):
@@ -229,8 +263,8 @@ class Subject(object):
                     f"{datasubset.subset}/" \
                     f"{subject}"
 
-        self.metadata, self.start, \
-            self.end, self.annotators = None, None, None, None
+        self.metadata, self.start, self.end, self.annotators = \
+            None, None, None, None
         self._index = None
 
         self.load()
@@ -387,8 +421,8 @@ class Subject(object):
         return df
 
     def load(self):
-        self.metadata, self.start, \
-            self.end, self.annotators = self._get_meta()
+        self.metadata, self.start, self.end, self.annotators =\
+            self._get_meta()
         self._index = self._get_index()
 
     def read_location(self):
