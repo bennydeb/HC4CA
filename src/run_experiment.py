@@ -55,7 +55,7 @@ def handle_args(*args):
                         help='Size of the test split for CV')
     parser.add_argument('--scoring', metavar="{'score1':metric1, ...}",
                         type=json.loads,
-                        default={'f1': 'f1_micro', 'AUC': 'roc_auc'},
+                        default={'f1': 'f1_micro'},  # , 'AUC': 'roc_auc'},
                         help='Data subset name')
 
     return parser.parse_args(args)
