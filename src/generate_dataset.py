@@ -49,6 +49,11 @@ def handle_args(*args):
 
     parser.add_argument('--dump-dataset', action='store_true',
                         help='Dump dataset object as pickle')
+    parser.add_argument('--dump-only', metavar='str1 str2 str3 ...', nargs="+",
+                        default='all',
+                        help='Dump only specified sensors from'
+                             ' [acceleration, pir, rssi, video_hallway, '
+                             'video_kitchen, video_living_room]')
     parser.add_argument('--dump-datasubset', action='store_true',
                         help='Dump datasubset object as pickle')
 
@@ -64,7 +69,7 @@ def handle_args(*args):
 
 def main(*args):
     parsed_args = handle_args(*args)
-    print(parsed_args)
+    # print(parsed_args)
 
     # Check whether we read from files or pickle
     metadata_path = parsed_args.metadata_path
@@ -88,26 +93,24 @@ def main(*args):
                          meta_path=metadata_path)
     # read dataset from pickle
     else:
-        # TODO: read from pickle
         if parsed_args.from_pickle is None:
             print("pickle file not given")
             raise FileNotFoundError(parsed_args.from_pickle)
 
         sphere = Dataset.load_from_pickle(parsed_args.from_pickle)
 
-    # TODO: only_sensor
-
     # TODO: resampling of dataset
 
     if parsed_args.dump_dataset:
         filename = sphere.dump(file_prefix=parsed_args.name)
-        print(f'dataset output file: {filename}')
+        print(f'\tdataset output file: {filename}')
 
     if parsed_args.dump_datasubset:
-        filename = sphere.data['train'].to_pickle(
-            file_prefix=parsed_args.name)
-        print(f'subset output file: {filename}')
+        # pass dump_only as the list of selected sensors
         # TODO: datasubset name as an argument
+        filename = sphere.data['train'].to_pickle(
+            file_prefix=parsed_args.name, sensors=parsed_args.dump_only)
+        print(f'\tsubset output file: {filename}')
 
 
 if __name__ == "__main__":

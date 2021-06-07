@@ -217,19 +217,23 @@ class DataSubset(object):
 
     # Always adds locations if they exists
     def to_pickle(self, **kwargs):
-
+        sensors = kwargs.pop('sensors', None)
         file_prefix = kwargs.pop("file_prefix", "DatasubsetObj_")
         time_stamp = kwargs.pop('time_stamp', True)
 
+        # set output file name
         file = file_prefix + f'_{self.subset}_'
-
         if time_stamp:
             time = datetime.now().strftime("%H%M%S%d%m%y")
             file = file + time
-
         file = file + ".gzip"
 
         df = self.raw_data.copy()
+
+        # separating sensors
+        df = self.get_only(df, sensors=sensors)
+
+        # add locations if they exists in the subset
         if self.locations is not None:
             df = pd.concat([df, self.locations], axis=1)
 
@@ -247,10 +251,12 @@ class DataSubset(object):
 
     @staticmethod
     def get_only(df, sensors):
+        if sensors == 'all':
+            return df
         df_sensors = set(df.columns.get_level_values(0))
         for sensor in sensors:
             if sensor not in df_sensors:
-                raise ValueError(sensor + "not in dataframe")
+                raise ValueError(sensor + " not in dataframe")
 
         return df.loc[(slice(None), sensors)]
 

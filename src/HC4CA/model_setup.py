@@ -7,12 +7,20 @@ from sklearn.linear_model import LogisticRegression
 
 
 def model_pipeline():
-    estimators = [('clf', SVC()),
+    estimators = [('clf', SVC(probability=True)),
                   ]
     return Pipeline(estimators)
 
 
 def model_GridSearchCV(**kwargs):
+    scoring = kwargs.pop('scoring')
+    refit = kwargs.pop('refit', None)
+    # take the first scoring for refit
+    # https://scikit-learn.org/stable/modules/generated/
+    # sklearn.model_selection.GridSearchCV.html
+    if refit is None:
+        refit = next(iter(scoring.values())) if isinstance(scoring, dict) else False
+
     pipeline = model_pipeline()
     models = {  # 'rf': {'model': RandomForestClassifier(),
         #        'parameters': {'n_estimators': [200, 250],
@@ -30,9 +38,9 @@ def model_GridSearchCV(**kwargs):
 
     pipeline_parameters = {'clf__' + key: value for key, value in
                            models['svc']['parameters'].items()}
-
     clf_GridSearch = GridSearchCV(pipeline, param_grid=pipeline_parameters,
-                                  refit=True, verbose=10, **kwargs
+                                  refit=refit, verbose=10, scoring=scoring,
+                                  **kwargs
                                   )
     # TODO: Evaluation by label summary
     return clf_GridSearch
