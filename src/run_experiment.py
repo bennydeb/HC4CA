@@ -2,9 +2,9 @@
 
 import os.path
 import argparse
-# import joblib
+import joblib
 import datetime
-import json
+# import json
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, f1_score, roc_auc_score
@@ -52,13 +52,40 @@ def handle_args(*args):
                         help='Experiment name')
 
     parser.add_argument('--test-size', metavar='0.N', type=float, default=0.2,
-                        help='Size of the test split for CV')
+                        help='Size of the test split. (train+dev) = 1-test')
+    parser.add_argument('--n-splits', metavar='N', type=int, default=5,
+                        help='splits to subdivide (train+dev) split into for cv')
     parser.add_argument('--scoring', metavar="{'score1':metric1, ...}",
                         type=json.loads,
                         default={'f1': 'f1_micro'},  # , 'AUC': 'roc_auc'},
                         help='Data subset name')
 
     return parser.parse_args(args)
+
+
+def print_evaluation(clf, X_test, y_test, probability=True):
+    control_predict = clf.predict(X_test)
+    control_predict_prob = clf.predict_proba(X_test)
+    print(f'micro f1-score: {f1_score(y_test, control_predict, average="micro")}'
+          f'\t weighted ovo ROC_AUC: '
+          f'{roc_auc_score(y_test,control_predict_prob, average="weighted", multi_class="ovo")}')
+    print(f'Classification report:\n'
+          f'{classification_report(y_test, control_predict)}\n')
+    return
+
+
+def save_results_csv(model_grid, exp_prefix):
+    """
+    Save GridSearchCV result as csv
+    :param model_grid: GridSearch returned object
+    :param exp_prefix: Experiment name prefix
+    :return:
+    """
+    time = datetime.now().strftime("%H%M%S%d%m%y")
+    output_file = exp_prefix + 'cv_results_' + time
+    print(f'Results stored as: {output_file  + ".csv"}')
+    pd.DataFrame(model_grid.cv_results_).to_csv(output_file + '.csv')
+    return output_file
 
 
 def main(*args):
@@ -96,41 +123,42 @@ def main(*args):
     transformation_pipe.fit(dataset)
     X = transformation_pipe.transform(dataset)
 
+    ########################################################
     # Splitting
     # Default: 80% training cross validation, 20% testing best model
     # train_test_split makes an stratified split by default
     X_train, X_test, y_train, y_test = \
         train_test_split(X, y, test_size=parsed_args.test_size)
-    print(f'\tX_train: {len(X_train)}, y_train: {len(y_train)}')
+    print(f'\tX_train: {len(X_train)}, y_train: {len(y_train)}\n')
 
+    ########################################################
     # Training a Simple Model
     # A quick control test
     print("Running control model")
-    model_pipe = model_pipeline()
+    model_pipe = model_pipeline(estimator=SVC(probability=True))
     model_pipe.fit(X_train, y_train)
-    control_predict = model_pipe.predict(X_test)
-    control_predict_prob = model_pipe.predict_proba(X_test)
-    print(f'\t micro f1-score: {f1_score(y_test, control_predict, average="micro")}'
-          f'\t weighted ovo ROC_AUC: '
-          f'{roc_auc_score(y_test,control_predict_prob, average="weighted", multi_class="ovo")}')
-    print(f'\t classification report:'
-          f'{classification_report(y_test, control_predict)}')
+    print_evaluation(model_pipe, X_test, y_test)
 
+    ########################################################
     # Training a set of models with diff parameters with GridSearch
     print("Running grid search")
-    model_grid = model_GridSearchCV(n_jobs=-1, cv=5,
+    model_grid = model_GridSearchCV(n_splits=parsed_args.n_splits,
                                     scoring=parsed_args.scoring,
                                     )
     model_grid.fit(X_train, y_train)
-    print(f'\tgrid search scores: {model_grid.score(X_test, y_test)}')
-    print("The best parameters are %s with a score of %0.2f"
+    print(f'\n\tgrid search scores: {model_grid.score(X_test, y_test)}\n')
+    print("The best parameters are %s with a score of %0.2f\n"
           % (model_grid.best_params_, model_grid.best_score_))
 
+    print(f'Evaluation of best_estimator_ on test split')
+    print_evaluation(model_grid.best_estimator_, X_test, y_test)
+
+    ########################################################
     # storing results in filesystem
-    time = datetime.now().strftime("%H%M%S%d%m%y")
-    output_file = exp_prefix + 'cv_results_' + time
-    print(f'Results stored as: {output_file}')
-    pd.DataFrame(model_grid.cv_results_).to_csv(output_file + '.csv')
+    output_file = save_results_csv(model_grid, exp_prefix)
+
+    print(f'best_estimator_ dump as: {output_file + ".pkl"}')
+    joblib.dump(model_grid.best_estimator_, output_file + '.pkl', compress=1)
 
 
 if __name__ == "__main__":

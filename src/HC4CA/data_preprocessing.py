@@ -48,11 +48,12 @@ def apply_pipeline(pipeline):
     pass
 
 
-def transformation_pipeline():
-    estimators = [('imputer', SimpleImputer()),
-                  ('standardise', StandardScaler()),
-                  ]
-    return Pipeline(estimators)
+def transformation_pipeline(steps=None, **kwargs):
+    if steps is None:
+        steps = [('imputer', SimpleImputer()),
+                 ('standardise', StandardScaler()),
+                 ]
+    return Pipeline(steps, **kwargs)
 
 
 # def split_dataset()
