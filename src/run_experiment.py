@@ -36,9 +36,10 @@ def handle_args(*args):
     #   https://docs.python.org/3/library/argparse.html
     #
 
-    parser = argparse.ArgumentParser(description='Prepare dataset data')
+    parser = argparse.ArgumentParser(description='Execute GridSearchCV with dataset',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--pickle', metavar='.pkl', type=file, default=None,
-                        help='Dataframe pickled file')
+                        help='Datasubset dataframe pickled file')
     # TODO: read from a csv - not necessary for now
     parser.add_argument('--csv', metavar='.csv', type=file, default=None,
                         help='Dataframe csv file')
