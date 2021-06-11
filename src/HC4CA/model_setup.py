@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 
-# cgnorthcutt:https://stackoverflow.com/questions/50285973/
+# https://stackoverflow.com/questions/50285973/
 # pipeline-multiple-classifiers
 class ClfSwitcher(BaseEstimator):
 
@@ -50,8 +50,8 @@ def model_parameters():
         'rf': {'model': RandomForestClassifier(),
                'parameters': {'n_estimators': [200, 250],
                               'min_samples_leaf': [1, 5, 10]}},
-        # 'lr': {'model': LogisticRegression(penalty='l2'),
-        #        'parameters': {'C': [0.01, 0.1, 1, 10, 100]}},
+        'lr': {'model': LogisticRegression(penalty='l2'),
+               'parameters': {'C': [0.01, 0.1, 1, 10, 100]}},
         'svc':
             {'estimator': SVC(probability=True),
              'parameters': {'kernel': ['linear'],
