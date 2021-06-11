@@ -135,10 +135,10 @@ def main(*args):
     ########################################################
     # Training a Simple Model
     # A quick control test
-    print("Running control model")
-    model_pipe = model_pipeline(estimator=SVC(probability=True))
-    model_pipe.fit(X_train, y_train)
-    print_evaluation(model_pipe, X_test, y_test)
+    # print("Running control model")
+    # model_pipe = model_pipeline(estimator=SVC(probability=True))
+    # model_pipe.fit(X_train, y_train)
+    # print_evaluation(model_pipe, X_test, y_test)
 
     ########################################################
     # Training a set of models with diff parameters with GridSearch

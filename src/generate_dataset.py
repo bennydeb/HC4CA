@@ -75,7 +75,7 @@ def main(*args):
     metadata_path = parsed_args.metadata_path
 
     # read dataset from files
-    if parsed_args.dataset_path is not None:
+    if parsed_args.dataseft_path is not None:
         dataset_path = parsed_args.dataset_path
 
         # take metadata from default path

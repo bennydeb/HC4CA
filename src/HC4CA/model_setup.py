@@ -47,16 +47,16 @@ def model_parameters():
             {'estimator': DecisionTreeClassifier(),
              'parameters': {'max_depth': [5, 10]}},
 
-        'rf': {'model': RandomForestClassifier(),
+        'rf': {'estimator': RandomForestClassifier(),
                'parameters': {'n_estimators': [200, 250],
                               'min_samples_leaf': [1, 5, 10]}},
-        'lr': {'model': LogisticRegression(penalty='l2'),
+        'lr': {'estimator': LogisticRegression(penalty='l2'),
                'parameters': {'C': [0.01, 0.1, 1, 10, 100]}},
         'svc':
             {'estimator': SVC(probability=True),
              'parameters': {'kernel': ['linear'],
                             'C': [1, 10]}},
-        'svc-rbf': {'model': SVC(probability=True),
+        'svc-rbf': {'estimator': SVC(probability=True),
                     'parameters': {'kernel': ['rbf'],
                                    'gamma': [1e-3, 1e-4],
                                    'C': [1, 10, 100, 1000]}},
@@ -77,8 +77,8 @@ def model_parameters():
 def model_GridSearchCV(**kwargs):
     scoring = kwargs.pop('scoring')
     refit = kwargs.pop('refit', None)
-    n_jobs = kwargs.pop('n_splits', 5)
-    n_splits = kwargs.pop('n_jobs', -1)
+    n_splits = kwargs.pop('n_splits', 5)
+    n_jobs = kwargs.pop('n_jobs', -1)
     cv = kwargs.pop('cv', None)
 
     if cv is None:
