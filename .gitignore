@@ -1,0 +1,11 @@
+.idea*
+dist/
+build/
+tests/
+*__pycache__*
+*.egg*
+.DS_Store
+#Data
+*.csv
+*.gzip
+*.pkl
