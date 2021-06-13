@@ -43,6 +43,8 @@ def handle_args(*args):
     parser.add_argument('--sensors', metavar='str1 str2 str3 ...', nargs="+",
                         default=['acceleration', 'pir', 'video'],
                         help='Sensor\'s names to read')
+    parser.add_argument('--freq', metavar='freq-str', type=str, default=None,
+                        help="Sampling frequency of dataset,eg:'1S'")
 
     parser.add_argument('--from-pickle', metavar='.pkl', type=file, default=None,
                         help='Dataframe pickled file')
@@ -75,7 +77,7 @@ def main(*args):
     metadata_path = parsed_args.metadata_path
 
     # read dataset from files
-    if parsed_args.dataseft_path is not None:
+    if parsed_args.dataset_path is not None:
         dataset_path = parsed_args.dataset_path
 
         # take metadata from default path
@@ -99,7 +101,9 @@ def main(*args):
 
         sphere = Dataset.load_from_pickle(parsed_args.from_pickle)
 
-    # TODO: resampling of dataset
+    # resampling of dataset
+    if parsed_args.freq is not None:
+        sphere.resample(freq=parsed_args.freq)
 
     if parsed_args.dump_dataset:
         filename = sphere.dump(file_prefix=parsed_args.name)

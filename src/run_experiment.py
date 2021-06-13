@@ -83,7 +83,7 @@ def save_results_csv(model_grid, exp_prefix):
     :return:
     """
     time = datetime.now().strftime("%H%M%S%d%m%y")
-    output_file = exp_prefix + 'cv_results_' + time
+    output_file = exp_prefix + '_cv_results_' + time
     print(f'Results stored as: {output_file  + ".csv"}')
     pd.DataFrame(model_grid.cv_results_).to_csv(output_file + '.csv')
     return output_file

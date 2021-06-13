@@ -2,10 +2,10 @@ import pandas as pd
 import os
 import json
 import pickle
+import copy
 from datetime import datetime
 
 
-# TODO: Fix var names unit and freq
 class Dataset(object):
     def __init__(self,
                  data_path,
@@ -57,6 +57,25 @@ class Dataset(object):
     def load(self):
         self.metadata = self._load_metadata()
         self.data = self._load_data_subsets()
+
+    def resample(self, inplace=True, **kwargs):
+        freq = kwargs.pop('freq', '1S')
+
+        # resample each subset in the dataset
+        for subset in self.subsets:
+            resampled_data = self.data[subset].resample(freq=freq)
+
+            # resample locations if there is one
+            resampled_locations = self.data[subset].resample_location(freq=freq)
+        if inplace:
+            self.data[subset].raw_data = resampled_data
+            self.data[subset].locations = resampled_locations
+
+        else:
+            new_obj = copy.deepcopy(self)
+            new_obj.data[subset].raw_data = resampled_data
+            new_obj.data[subset].locations = resampled_locations
+            return new_obj
 
     def to_csv(self):  # TODO: prepare to csv
         return self
@@ -186,6 +205,9 @@ class DataSubset(object):
     # TODO: quick fix
     def resample_location(self, **kwargs):
         freq = kwargs.pop('freq', '1S')
+
+        if self.locations is None:
+            return None
 
         df1 = pd.DataFrame([])
         # resampling doesn't work on multi-index.
