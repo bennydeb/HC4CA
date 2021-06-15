@@ -61,12 +61,20 @@ class Dataset(object):
     def resample(self, inplace=True, **kwargs):
         freq = kwargs.pop('freq', '1S')
 
+        resampled_data = None
+        resampled_locations = None
+        subset = []
         # resample each subset in the dataset
         for subset in self.subsets:
             resampled_data = self.data[subset].resample(freq=freq)
 
             # resample locations if there is one
-            resampled_locations = self.data[subset].resample_location(freq=freq)
+            resampled_locations = self.data[subset].resample_location(
+                freq=freq)
+
+        if resampled_data is None or resampled_locations is None:
+            raise ValueError(resampled_locations, resampled_data)
+
         if inplace:
             self.data[subset].raw_data = resampled_data
             self.data[subset].locations = resampled_locations

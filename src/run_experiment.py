@@ -105,8 +105,8 @@ def main(*args):
     else:
         raise ValueError("No source")
 
-    # TODO remove after testing
-    dataset = dataset.loc['00001']
+    # # - remove after testing
+    # dataset = dataset.loc['00001']
     # get labels
     if parsed_args.locations:
         dataset, labels = split_labels(dataset, parsed_args.multiclass)
@@ -135,10 +135,10 @@ def main(*args):
     ########################################################
     # Training a Simple Model
     # A quick control test
-    # print("Running control model")
-    # model_pipe = model_pipeline(estimator=SVC(probability=True))
-    # model_pipe.fit(X_train, y_train)
-    # print_evaluation(model_pipe, X_test, y_test)
+    print("Running control model")
+    model_pipe = model_pipeline(estimator=SVC(probability=True))
+    model_pipe.fit(X_train, y_train)
+    print_evaluation(model_pipe, X_test, y_test)
 
     ########################################################
     # Training a set of models with diff parameters with GridSearch
@@ -151,9 +151,11 @@ def main(*args):
     print("The best parameters are %s with a score of %0.2f\n"
           % (model_grid.best_params_, model_grid.best_score_))
 
+    print(f'###########################################')
     print(f'Evaluation of best_estimator_ on test split')
+    print(f'###########################################')
     print_evaluation(model_grid.best_estimator_, X_test, y_test)
-
+    print(f'###########################################')
     ########################################################
     # storing results in filesystem
     output_file = save_results_csv(model_grid, exp_prefix)

@@ -1,5 +1,6 @@
 .idea*
 dist/
+old_dist/
 build/
 tests/
 *__pycache__*
