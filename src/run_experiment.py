@@ -64,7 +64,7 @@ def handle_args(*args):
     return parser.parse_args(args)
 
 
-def print_evaluation(clf, X_test, y_test, probability=True):
+def print_evaluation(clf, X_test, y_test):   # , probability=True
     control_predict = clf.predict(X_test)
     control_predict_prob = clf.predict_proba(X_test)
     print(f'micro f1-score: {f1_score(y_test, control_predict, average="micro")}'
@@ -106,11 +106,13 @@ def main(*args):
         raise ValueError("No source")
 
     # # - remove after testing
-    # dataset = dataset.loc['00001']
+    # dataset = dataset.loc[['00001','00002']]
     # get labels
+    y = []
     if parsed_args.locations:
         dataset, labels = split_labels(dataset, parsed_args.multiclass)
         y = labels
+    # print(y.index, dataset.index)
 
     assert (len(y) == len(dataset))
     print(f'\tdataset size: {len(dataset)}'
@@ -128,9 +130,28 @@ def main(*args):
     # Splitting
     # Default: 80% training cross validation, 20% testing best model
     # train_test_split makes an stratified split by default
-    X_train, X_test, y_train, y_test = \
-        train_test_split(X, y, test_size=parsed_args.test_size)
-    print(f'\tX_train: {len(X_train)}, y_train: {len(y_train)}\n')
+    # # X_train, X_test, y_train, y_test = \
+    # #     train_test_split(X, y, test_size=parsed_args.test_size)
+    # # print(f'\tX_train: {len(X_train)}, y_train: {len(y_train)}\n')
+
+    # Splitting by participant
+
+    X = pd.DataFrame(X, index=y.index)
+
+    # Manual split of training/testing
+    # 1-8 training 9-10 testing
+    train_interval = ('00001', '00008')
+    test_interval = ('00009', '00010')
+
+    # Training
+    X_train = X.loc[train_interval[0]:train_interval[1]]
+    y_train = y.loc[train_interval[0]:train_interval[1]]
+    assert(len(X_train == len(y_train)))
+
+    # Testing
+    X_test = X.loc[test_interval[0]:test_interval[1]]
+    y_test = y.loc[test_interval[0]:test_interval[1]]
+    assert(len(X_test) == len(y_test))
 
     ########################################################
     # Training a Simple Model
