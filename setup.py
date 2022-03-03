@@ -27,7 +27,7 @@ setuptools.setup(
         # 'os',
         # 'argparse',
         'pandas',
-        'sklearn',
+        # 'sklearn',
         # 'json',
         # 'pickle',
         # 'datetime',
