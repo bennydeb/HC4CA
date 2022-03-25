@@ -1,4 +1,5 @@
 .idea*
+dist/
 old_dist/dist/
 old_dist/
 old_dist/build/
