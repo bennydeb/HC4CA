@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="HC4CA",
-    version="0.0.13",
+    version="0.0.14",
     author="BennyDeb",
     author_email="bennydeb@gmail.com",
     description="Hierarchical Classification for Context Awareness Pack",
