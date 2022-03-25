@@ -6,12 +6,8 @@ import joblib
 import datetime
 # import json
 
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, f1_score, roc_auc_score
 # from sklearn.metrics import confusion_matrix
-
-from HC4CA.data_preprocessing import *
-from HC4CA.model_setup import *
 
 
 #

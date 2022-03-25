@@ -4,6 +4,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 
+from numpy import array
+
 
 def import_dataset(source, source_type='pkl'):
     """Get Dataset from somewhere and return a df
@@ -39,7 +41,7 @@ def split_labels(dataset, multiclass=False):
     if multiclass:
         labels = labels.idxmax(axis=1)
 
-    assert(len(labels) == len(dataset))
+    assert (len(labels) == len(dataset))
 
     return dataset, labels
 
@@ -79,10 +81,35 @@ def feature_scaling(dataset):
 def feature_resampling(dataset):
     pass
 
+
 # def encode_categorical():
 
 
 # Data Reduction
 # pca
 
+# General
+# from 4Houses_TechnicianVisits.
 
+def get_Xy(df_rssi, flatten=True):
+    y = df_rssi['label']
+    X = df_rssi.drop('label', axis=1)
+    if flatten:
+        X = X.reset_index(drop=True)
+    return X, y
+
+
+def check_Xy(X, y):
+    X = array(X)
+    return X, y
+
+
+# RSSI preprocessing
+def preprocess_X_rssi(X, value=-100.0):
+    """ Deals with NaN, missing values, etc.
+
+    :param X:
+    :param value: default:-100.0 db.
+    :return:
+    """
+    return X.fillna(value)

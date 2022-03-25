@@ -2,8 +2,7 @@
 import os.path
 import argparse
 
-from HC4CA.classes import *
-
+from HC4CA.classes import Dataset
 
 #
 #  handle input arguments

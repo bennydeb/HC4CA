@@ -1,7 +1,7 @@
 .idea*
-dist/
+old_dist/dist/
 old_dist/
-build/
+old_dist/build/
 tests/
 *__pycache__*
 *.egg*

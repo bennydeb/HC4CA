@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="HC4CA",
-    version="0.0.14",
+    version="0.1.0",
     author="BennyDeb",
     author_email="bennydeb@gmail.com",
     description="Hierarchical Classification for Context Awareness Pack",
@@ -20,13 +20,13 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src", exclude=("Dataset",)),
+    package_dir={"": "HC4CA"},
+    packages=setuptools.find_packages(where="HC4CA", exclude=("Dataset",)),
     python_requires='>=3.6',
     install_requires=[
         # 'os',
         # 'argparse',
-        'pandas',
+        # 'pandas',
         # 'sklearn',
         # 'json',
         # 'pickle',
