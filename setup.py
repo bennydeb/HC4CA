@@ -20,10 +20,10 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "HC4CA"},
-    packages=setuptools.find_packages(where="HC4CA", exclude=("Dataset",)),
+#    package_dir={"": "HC4CA"},
+    packages=setuptools.find_packages(),
     python_requires='>=3.6',
-    install_requires=[
+    # install_requires=[
         # 'os',
         # 'argparse',
         # 'pandas',
@@ -31,5 +31,5 @@ setuptools.setup(
         # 'json',
         # 'pickle',
         # 'datetime',
-    ],
+    # ],
 )
