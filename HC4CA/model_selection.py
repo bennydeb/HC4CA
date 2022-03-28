@@ -27,6 +27,8 @@ In real life applications this parameter is usually chosen
 using :ref:`grid_search`.
 
 """
+
+from .data_preprocessing import check_Xy
 import itertools
 import math
 import numpy as np
@@ -55,13 +57,12 @@ from sklearn.model_selection import ShuffleSplit
 # from sklearn.preprocessing import StandardScaler
 from sklearn import metrics
 
-from .data_preprocessing import check_Xy
 
 
 # print(__doc__)
 # TODO: Document model selection module
 
-def plot_confusion_matrix(cm, classes,
+def plot_confusion_matrix(cm, classes=None,
                           normalise=False,
                           title='Confusion matrix',
                           cmap=plt.cm.Blues):
@@ -121,8 +122,7 @@ def plot_confusion_matrix_grp(conf_mat, **kwargs):
 
     for name, cm in conf_mat.items():
         plt.subplot(nrows, ncols, index)
-        plot_confusion_matrix(cm, classes=classes, normalise=normalise,
-                              title=f'{name} - {title}')
+        plot_confusion_matrix(cm, classes=classes, normalise=normalise, title=title)
 
         index += 1
     plt.show()
@@ -154,8 +154,8 @@ def plot_confusion_matrix_grp(conf_mat, **kwargs):
 # """
 # print(__doc__)
 
-# Code source: Gaël Varoquaux
-#              Andreas Müller
+# Code source: Gael Varoquaux
+#              Andreas Muller
 # Modified for documentation by Jaques Grobler
 # License: BSD 3 clause
 
@@ -220,19 +220,26 @@ def compare_classifiers(X, y, **kwargs):
         score[name] = pd.DataFrame(clf_score)
 
     if cm:
+        labels = sorted(set(y.values))
+        
         conf_mat = {}
         for name in names:
+
             clf_predicted = np.array([], dtype=int)
             all_test_index = np.array([], dtype=int)
             for n, (train_index, test_index) in enumerate(cv.split(X)):
+                clf = score[name]['estimator'][n]
                 X_test = X[test_index]
-                this_score = score[name]['estimator'][n].predict(X_test)
+                this_prediction = clf.predict(X_test)
+
+                # keep all predictions and test index
                 clf_predicted = np.append(clf_predicted,
-                                          this_score)
+                                          this_prediction)
                 all_test_index = np.append(all_test_index, test_index)
-            clf_cm = metrics.confusion_matrix(y[all_test_index], clf_predicted)
+            clf_cm = metrics.confusion_matrix(y[all_test_index], clf_predicted,
+                                              labels=labels)
             conf_mat[name] = clf_cm
 
         return pd.concat(score, axis=1), conf_mat
 
-    return pd.concat(score, axis=1), score
+    return pd.concat(score, axis=1)

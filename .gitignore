@@ -11,3 +11,4 @@ tests/
 *.csv
 *.gzip
 *.pkl
+*.swp
