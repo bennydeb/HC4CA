@@ -58,7 +58,6 @@ from sklearn.model_selection import ShuffleSplit
 from sklearn import metrics
 
 
-
 # print(__doc__)
 # TODO: Document model selection module
 
@@ -221,7 +220,7 @@ def compare_classifiers(X, y, **kwargs):
 
     if cm:
         labels = sorted(set(y.values))
-        
+
         conf_mat = {}
         for name in names:
 

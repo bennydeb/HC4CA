@@ -3,11 +3,17 @@
 import os.path
 import argparse
 import joblib
-import datetime
-# import json
+from datetime import datetime
+import json
+import pandas as pd
 
 from sklearn.metrics import classification_report, f1_score, roc_auc_score
-# from sklearn.metrics import confusion_matrix
+from sklearn.svm import SVC
+
+from HC4CA.data_preprocessing import (split_labels,
+                                      import_dataset,
+                                      transformation_pipeline)
+from HC4CA.model_setup import model_pipeline, model_GridSearchCV
 
 
 #
@@ -60,12 +66,12 @@ def handle_args(*args):
     return parser.parse_args(args)
 
 
-def print_evaluation(clf, X_test, y_test):   # , probability=True
+def print_evaluation(clf, X_test, y_test):  # , probability=True
     control_predict = clf.predict(X_test)
     control_predict_prob = clf.predict_proba(X_test)
     print(f'micro f1-score: {f1_score(y_test, control_predict, average="micro")}'
           f'\t weighted ovo ROC_AUC: '
-          f'{roc_auc_score(y_test,control_predict_prob, average="weighted", multi_class="ovo")}')
+          f'{roc_auc_score(y_test, control_predict_prob, average="weighted", multi_class="ovo")}')
     print(f'Classification report:\n'
           f'{classification_report(y_test, control_predict)}\n')
     return
@@ -80,7 +86,7 @@ def save_results_csv(model_grid, exp_prefix):
     """
     time = datetime.now().strftime("%H%M%S%d%m%y")
     output_file = exp_prefix + '_cv_results_' + time
-    print(f'Results stored as: {output_file  + ".csv"}')
+    print(f'Results stored as: {output_file + ".csv"}')
     pd.DataFrame(model_grid.cv_results_).to_csv(output_file + '.csv')
     return output_file
 
@@ -132,7 +138,7 @@ def main(*args):
 
     # Splitting by participant
 
-    X = pd.DataFrame(X, index=y.index)
+    X = pd.DataFrame(X, index=y.index, )
 
     # Manual split of training/testing
     # 1-8 training 9-10 testing
@@ -142,12 +148,12 @@ def main(*args):
     # Training
     X_train = X.loc[train_interval[0]:train_interval[1]]
     y_train = y.loc[train_interval[0]:train_interval[1]]
-    assert(len(X_train == len(y_train)))
+    assert (len(X_train == len(y_train)))
 
     # Testing
     X_test = X.loc[test_interval[0]:test_interval[1]]
     y_test = y.loc[test_interval[0]:test_interval[1]]
-    assert(len(X_test) == len(y_test))
+    assert (len(X_test) == len(y_test))
 
     ########################################################
     # Training a Simple Model
