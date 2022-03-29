@@ -157,16 +157,8 @@ def plot_confusion_matrix_grp(conf_mat, **kwargs):
 #              Andreas Muller
 # Modified for documentation by Jaques Grobler
 # License: BSD 3 clause
-
-def compare_classifiers(X, y, **kwargs):
-    scoring = kwargs.pop('scoring', 'accuracy')
-    cv = kwargs.pop('cv', 5)
-    n_jobs = kwargs.pop('n_jobs', -1)
-    cm = kwargs.pop('cm', False)
-    return_estimator = kwargs.pop('return_estimator', True)
-
-    if 'names' not in kwargs:
-        names = ["Logistic Regression",
+def _get_default_clfs(**kwargs):
+    names = ["Logistic Regression",
                  "Gradient Boosting",
                  "Nearest Neighbors",
                  "Linear SVM",
@@ -179,28 +171,40 @@ def compare_classifiers(X, y, **kwargs):
                  "Naive Bayes",
                  "QDA"
                  ]
-        classifiers = [LogisticRegression(n_jobs=n_jobs),
-                       GradientBoostingClassifier(n_estimators=100,
-                                                  learning_rate=1.0,
-                                                  max_depth=1,
-                                                  random_state=0,
-                                                  ),
-                       KNeighborsClassifier(3),
-                       SVC(kernel="linear", C=0.025, gamma='auto'),
-                       SVC(C=1, gamma='auto'),
-                       GaussianProcessClassifier(1.0 * RBF(1.0),
-                                                 warm_start=False,
-                                                 n_jobs=n_jobs),
-                       DecisionTreeClassifier(max_depth=5),
-                       RandomForestClassifier(max_depth=5,
-                                              n_estimators=10,
-                                              max_features=1,
-                                              n_jobs=n_jobs),
-                       MLPClassifier(alpha=1),
-                       AdaBoostClassifier(),
-                       GaussianNB(),
-                       QuadraticDiscriminantAnalysis()
-                       ]
+    funcs = [LogisticRegression(n_jobs=n_jobs),
+                   GradientBoostingClassifier(n_estimators=100,
+                                              learning_rate=1.0,
+                                              max_depth=1,
+                                              random_state=0,
+                                              ),
+                   KNeighborsClassifier(3),
+                   SVC(kernel="linear", C=0.025, gamma='auto'),
+                   SVC(C=1, gamma='auto'),
+                   GaussianProcessClassifier(1.0 * RBF(1.0),
+                                             warm_start=False,
+                                             n_jobs=n_jobs),
+                   DecisionTreeClassifier(max_depth=5),
+                   RandomForestClassifier(max_depth=5,
+                                          n_estimators=10,
+                                          max_features=1,
+                                          n_jobs=n_jobs),
+                   MLPClassifier(alpha=1),
+                   AdaBoostClassifier(),
+                   GaussianNB(),
+                   QuadraticDiscriminantAnalysis()
+                   ]
+    return names, funcs
+
+
+def compare_classifiers(X, y, **kwargs):
+    scoring = kwargs.pop('scoring', 'accuracy')
+    cv = kwargs.pop('cv', 5)
+    n_jobs = kwargs.pop('n_jobs', -1)
+    cm = kwargs.pop('cm', False)
+    return_estimator = kwargs.pop('return_estimator', True)
+
+    if 'names' not in kwargs:
+        names, classifiers = _get_default_clfs()
     else:
         names = kwargs.pop('names')
         classifiers = kwargs.pop('classifiers')
@@ -242,3 +246,23 @@ def compare_classifiers(X, y, **kwargs):
         return pd.concat(score, axis=1), conf_mat
 
     return pd.concat(score, axis=1)
+
+
+def batch_train_clfs(X, y, clf, **kwargs):
+
+    names, classifiers = _get_default_clfs()
+
+    models = {}
+    for name, clf in zip(names, classifiers):
+        models[name]=clf.fit(X,y)
+
+    return models
+
+def batch_test_clfs(y, models, **kwargs):
+
+    model_predictions = {}
+    for name, model in models.items():
+        model_predictions[name] = model.predict(y)
+
+    return model_predictions
+        
