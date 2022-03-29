@@ -105,11 +105,11 @@ def check_Xy(X, y):
 
 
 # RSSI preprocessing
-def preprocess_X_rssi(X, value=-100.0):
+def preprocess_X_rssi(X, value=-120.0):
     """ Deals with NaN, missing values, etc.
 
     :param X:
-    :param value: default:-100.0 db.
+    :param value: default:-120.0 db.
     :return:
     """
     return X.fillna(value)
