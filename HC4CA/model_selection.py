@@ -34,7 +34,6 @@ import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-# %matplotlib inline
 
 
 from sklearn.linear_model import LogisticRegression
@@ -158,6 +157,8 @@ def plot_confusion_matrix_grp(conf_mat, **kwargs):
 # Modified for documentation by Jaques Grobler
 # License: BSD 3 clause
 def _get_default_clfs(**kwargs):
+    n_jobs = kwargs.pop("n_jobs", None)
+
     names = ["Logistic Regression",
                  "Gradient Boosting",
                  "Nearest Neighbors",
@@ -204,7 +205,7 @@ def compare_classifiers(X, y, **kwargs):
     return_estimator = kwargs.pop('return_estimator', True)
 
     if 'names' not in kwargs:
-        names, classifiers = _get_default_clfs()
+        names, classifiers = _get_default_clfs(n_jobs=n_jobs)
     else:
         names = kwargs.pop('names')
         classifiers = kwargs.pop('classifiers')
@@ -248,7 +249,7 @@ def compare_classifiers(X, y, **kwargs):
     return pd.concat(score, axis=1)
 
 
-def batch_train_clfs(X, y, clf, **kwargs):
+def batch_train_clfs(X, y, **kwargs):
 
     names, classifiers = _get_default_clfs()
 
