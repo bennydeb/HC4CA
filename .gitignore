@@ -1,13 +1,9 @@
 .idea*
 dist/
-old_dist/dist/
-old_dist/
-old_dist/build/
-tests/
 *__pycache__*
 *.egg*
 .DS_Store
-#Data
+Dataset
 *.csv
 *.gzip
 *.pkl
