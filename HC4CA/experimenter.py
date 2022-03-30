@@ -99,6 +99,9 @@ class Dataset(GenericObject):
 
         self.train_test_split()
 
+    def __len__(self):
+        return self.dataset.shape[0]
+
     def get_train_Xy(self):
         try:
             X_train = self.X[self.train_idx]
@@ -115,6 +118,9 @@ class Dataset(GenericObject):
 
     def get_test_y(self):
         return self.y[self.test_idx]
+
+    def get_test_Xy(self):
+        return self.get_test_X(), self.get_test_y()
 
     def get_Xy(self, flatten=True, label_col='label'):
         if self.X is None and self.y is None:
@@ -191,19 +197,33 @@ class Models(GenericObject):
 
 
 class Experiment(GenericObject):
+    """
+    General Experiment holder
+    """
     def __init__(self,
                  description,
                  data: Dataset = None,
                  models: Models = None,
                  results: Results = None,
                  scoring=('accuracy',),
+                 multi_dataset=False,
                  ):
+        """
+
+        :param description:
+        :param data: Dataset or dict {visit: Dataset} format
+        :param models:
+        :param results:
+        :param scoring:
+        :param multi_dataset:
+        """
         super().__init__(description)
         self.description = description
         self.data = data
         self.models = models
         self.results = results
         self.scoring = scoring
+        self.multi_dataset = multi_dataset
 
     @staticmethod
     def make_score(score, average="micro", **kwargs):
@@ -223,6 +243,7 @@ class Experiment(GenericObject):
         for clf, y_predict in predicts.items():
 
             scores[clf] = {}
+            # TODO: handle when scoring is a dict
             for metric in self.scoring:
                 if metric == 'accuracy':
                     metric_func = accuracy_score
@@ -235,17 +256,30 @@ class Experiment(GenericObject):
                 scores[clf][metric] = metric_func(y, y_predict)
         return scores
 
+    def get_train_Xy(self, visit=None):
+        if not self.multi_dataset:
+            X, y = self.data.get_train_Xy()
+        else:
+            X, y = self.data[visit].get_Xy()
+        return X, y
+
+    def get_test_Xy(self, visit=None):
+        if not self.multi_dataset:
+            X, y = self.data.get_test_Xy()
+        else:
+            X, y = self.data[visit].get_Xy()
+        return X, y
+
     def run(self):
         # fit
-        X, y = self.data.get_train_Xy()
+        X, y = self.get_train_Xy()
         self.models.fit(X, y)
 
         # predict
-        X_test = self.data.get_test_X()
+        X_test, y_test = self.get_test_Xy()
         predicts = self.models.predict(X_test)
 
         # score
-        y_test = self.data.get_test_y()
         scores = self.score(y_test, predicts)
 
         if self.results is None:
