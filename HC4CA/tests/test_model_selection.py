@@ -79,7 +79,7 @@ if __name__ == "__main__":
                                                         random_state=0)
 
     scores, confm = compare_classifiers(X_train, y_train,
-                                        names=clf_names, classifiers=clf_classifiers,
+                                        # names=clf_names, classifiers=clf_classifiers,
                                         n_jobs=-1,
                                         cm=True)
     #     print(scores)

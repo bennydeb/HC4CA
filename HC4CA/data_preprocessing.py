@@ -91,16 +91,20 @@ def feature_resampling(dataset):
 # General
 # from 4Houses_TechnicianVisits.
 
-def get_Xy(df_rssi, flatten=True):
-    y = df_rssi['label']
-    X = df_rssi.drop('label', axis=1)
+def get_Xy(df_rssi, flatten=True, label_col='label'):
+    y = df_rssi[label_col]
+    X = df_rssi.drop(label_col, axis=1)
     if flatten:
         X = X.reset_index(drop=True)
     return X, y
 
 
-def check_Xy(X, y):
-    X = array(X)
+def check_Xy(X, y, as_array=False):
+    if as_array:
+        X = array(X)
+    if len(X) != len(y):
+        raise ValueError(f"X has length{len(X)}, and y: {len(y)}")
+
     return X, y
 
 

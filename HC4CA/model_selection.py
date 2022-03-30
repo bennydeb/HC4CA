@@ -35,7 +35,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
@@ -156,59 +155,70 @@ def plot_confusion_matrix_grp(conf_mat, **kwargs):
 #              Andreas Muller
 # Modified for documentation by Jaques Grobler
 # License: BSD 3 clause
-def _get_default_clfs(**kwargs):
+
+def _make_dict(keys, values):
+    dict_ = {}
+    for key, value in zip(keys, values):
+        dict_[key] = value
+
+    return dict_
+
+
+def get_default_clfs(**kwargs):
     n_jobs = kwargs.pop("n_jobs", None)
 
     names = ["Logistic Regression",
-                 "Gradient Boosting",
-                 "Nearest Neighbors",
-                 "Linear SVM",
-                 "RBF SVM",
-                 "Gaussian Process",
-                 "Decision Tree",
-                 "Random Forest",
-                 "MLP Classifier",
-                 "AdaBoost",
-                 "Naive Bayes",
-                 "QDA"
-                 ]
+             "Gradient Boosting",
+             "Nearest Neighbors",
+             "Linear SVM",
+             "RBF SVM",
+             "Gaussian Process",
+             "Decision Tree",
+             "Random Forest",
+             "MLP Classifier",
+             "AdaBoost",
+             "Naive Bayes",
+             "QDA"
+             ]
     funcs = [LogisticRegression(n_jobs=n_jobs),
-                   GradientBoostingClassifier(n_estimators=100,
-                                              learning_rate=1.0,
-                                              max_depth=1,
-                                              random_state=0,
-                                              ),
-                   KNeighborsClassifier(3),
-                   SVC(kernel="linear", C=0.025, gamma='auto'),
-                   SVC(C=1, gamma='auto'),
-                   GaussianProcessClassifier(1.0 * RBF(1.0),
-                                             warm_start=False,
-                                             n_jobs=n_jobs),
-                   DecisionTreeClassifier(max_depth=5),
-                   RandomForestClassifier(max_depth=5,
-                                          n_estimators=10,
-                                          max_features=1,
-                                          n_jobs=n_jobs),
-                   MLPClassifier(alpha=1),
-                   AdaBoostClassifier(),
-                   GaussianNB(),
-                   QuadraticDiscriminantAnalysis()
-                   ]
-    return names, funcs
+             GradientBoostingClassifier(n_estimators=100,
+                                        learning_rate=1.0,
+                                        max_depth=1,
+                                        random_state=0,
+                                        ),
+             KNeighborsClassifier(3),
+             SVC(kernel="linear", C=0.025, gamma='auto'),
+             SVC(C=1, gamma='auto'),
+             GaussianProcessClassifier(1.0 * RBF(1.0),
+                                       warm_start=False,
+                                       n_jobs=n_jobs),
+             DecisionTreeClassifier(max_depth=5),
+             RandomForestClassifier(max_depth=5,
+                                    n_estimators=10,
+                                    max_features=1,
+                                    n_jobs=n_jobs),
+             MLPClassifier(alpha=1, max_iter=600),
+             AdaBoostClassifier(),
+             GaussianNB(),
+             QuadraticDiscriminantAnalysis()
+             ]
+    clfs = _make_dict(names, funcs)
+
+    return clfs
 
 
 def compare_classifiers(X, y, **kwargs):
+    labels = kwargs.pop("labels", sorted(set(y)))
     scoring = kwargs.pop('scoring', 'accuracy')
     cv = kwargs.pop('cv', 5)
     n_jobs = kwargs.pop('n_jobs', -1)
     cm = kwargs.pop('cm', False)
     return_estimator = kwargs.pop('return_estimator', True)
 
-    if 'names' not in kwargs:
-        names, classifiers = _get_default_clfs(n_jobs=n_jobs)
+    if 'clfs' not in kwargs:
+        clfs = get_default_clfs(n_jobs=n_jobs)
     else:
-        names = kwargs.pop('names')
-        classifiers = kwargs.pop('classifiers')
+        clfs = kwargs.pop('clfs')
 
     X, y = check_Xy(X, y)
 
@@ -216,7 +226,7 @@ def compare_classifiers(X, y, **kwargs):
     n_splits = cv
     cv = ShuffleSplit(n_splits=n_splits, test_size=(1 / n_splits), random_state=0)
     score = {}
-    for name, clf in zip(names, classifiers):
+    for name, clf in clfs.items():
         clf_score = cross_validate(clf, X, y, scoring=scoring, cv=cv, n_jobs=n_jobs,
                                    return_train_score=True,
                                    return_estimator=return_estimator,
@@ -224,10 +234,9 @@ def compare_classifiers(X, y, **kwargs):
         score[name] = pd.DataFrame(clf_score)
 
     if cm:
-        labels = sorted(set(y.values))
 
         conf_mat = {}
-        for name in names:
+        for name in clfs.keys():
 
             clf_predicted = np.array([], dtype=int)
             all_test_index = np.array([], dtype=int)
@@ -250,20 +259,18 @@ def compare_classifiers(X, y, **kwargs):
 
 
 def batch_train_clfs(X, y, **kwargs):
-
-    names, classifiers = _get_default_clfs()
+    names, classifiers = get_default_clfs()
 
     models = {}
     for name, clf in zip(names, classifiers):
-        models[name]=clf.fit(X,y)
+        models[name] = clf.fit(X, y)
 
     return models
 
-def batch_test_clfs(y, models, **kwargs):
 
+def batch_test_clfs(y, models, **kwargs):
     model_predictions = {}
     for name, model in models.items():
         model_predictions[name] = model.predict(y)
 
     return model_predictions
-        
