@@ -29,7 +29,7 @@ print(models)
 exp = Experiment("Test experiment",
                  models=models,
                  data=data,
-                 scoring=['accuracy', 'f1'])
+                 scoring=['accuracy', 'f1_micro'])
 
 # scores = exp.score(y_test, pred, scoring=['accuracy', 'f1'])
 

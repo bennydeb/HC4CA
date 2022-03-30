@@ -207,6 +207,8 @@ class Experiment(GenericObject):
                  results: Results = None,
                  scoring=('accuracy',),
                  multi_dataset=False,
+                 train_set = None,
+                 test_set = None,
                  ):
         """
 
@@ -224,6 +226,8 @@ class Experiment(GenericObject):
         self.results = results
         self.scoring = scoring
         self.multi_dataset = multi_dataset
+        self.train_set = train_set
+        self.test_set = test_set
 
     @staticmethod
     def make_score(score, average="micro", **kwargs):
@@ -247,8 +251,10 @@ class Experiment(GenericObject):
             for metric in self.scoring:
                 if metric == 'accuracy':
                     metric_func = accuracy_score
-                elif metric == 'f1':
-                    metric_func = Experiment.make_score(f1_score)
+                elif metric == 'f1_micro':
+                    metric_func = Experiment.make_score(f1_score, average="micro")
+                elif metric == 'f1_macro':
+                    metric_func = Experiment.make_score(f1_score, average="macro")
                 elif callable(metric):
                     metric_func = metric
                 else:
@@ -256,18 +262,18 @@ class Experiment(GenericObject):
                 scores[clf][metric] = metric_func(y, y_predict)
         return scores
 
-    def get_train_Xy(self, visit=None):
+    def get_train_Xy(self):
         if not self.multi_dataset:
             X, y = self.data.get_train_Xy()
         else:
-            X, y = self.data[visit].get_Xy()
+            X, y = self.data[self.train_set].get_Xy()
         return X, y
 
-    def get_test_Xy(self, visit=None):
+    def get_test_Xy(self ):
         if not self.multi_dataset:
             X, y = self.data.get_test_Xy()
         else:
-            X, y = self.data[visit].get_Xy()
+            X, y = self.data[self.test_set].get_Xy()
         return X, y
 
     def run(self):

@@ -180,7 +180,7 @@ def get_default_clfs(**kwargs):
              "Naive Bayes",
              "QDA"
              ]
-    funcs = [LogisticRegression(n_jobs=n_jobs),
+    funcs = [LogisticRegression(n_jobs=n_jobs, max_iter=200),
              GradientBoostingClassifier(n_estimators=100,
                                         learning_rate=1.0,
                                         max_depth=1,
