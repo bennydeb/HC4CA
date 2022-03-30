@@ -14,7 +14,7 @@ Results have scores, scoring measures.
 import pandas as pd
 
 from .model_selection import get_default_clfs
-from .data_preprocessing import get_Xy, check_Xy
+from .data_preprocessing import get_Xy, check_Xy, dummy_preprocessor
 
 from sklearn.exceptions import NotFittedError
 from sklearn.metrics import f1_score, accuracy_score
@@ -29,10 +29,10 @@ class GenericObject:
         self.description = description
 
     def __str__(self):
-        return f"{self.description}"
+        return f"'{self.description}'"
 
     def __repr__(self):
-        return f"{self.description}"
+        return f'"{self.description}"'
 
 
 class Results(GenericObject):
@@ -73,11 +73,12 @@ class Dataset(GenericObject):
                  hid,
                  visit,
                  dataset,
-                 classes,
+                 classes=None,
                  test_size=None,
                  train_size=None,
                  shuffle=True,
                  random_state=None,
+                 preprocessor=dummy_preprocessor,
                  ):
         super().__init__(description)
         self.description = description
@@ -89,6 +90,7 @@ class Dataset(GenericObject):
         self.train_size = train_size
         self.shuffle = shuffle
         self.random_state = random_state
+        self.preprocessor = preprocessor
 
         self.X = None
         self.y = None
@@ -119,6 +121,7 @@ class Dataset(GenericObject):
             X, y = get_Xy(self.dataset,
                           flatten=flatten,
                           label_col=label_col)
+            X = self.preprocessor(X)
             self.X, self.y = check_Xy(X, y)
         return self.X, self.y
 

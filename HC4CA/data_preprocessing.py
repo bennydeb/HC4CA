@@ -117,3 +117,7 @@ def preprocess_X_rssi(X, value=-120.0):
     :return:
     """
     return X.fillna(value)
+
+def dummy_preprocessor(X, **kwargs):
+    return X
+

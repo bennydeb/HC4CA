@@ -242,6 +242,7 @@ def compare_classifiers(X, y, **kwargs):
             all_test_index = np.array([], dtype=int)
             for n, (train_index, test_index) in enumerate(cv.split(X)):
                 clf = score[name]['estimator'][n]
+                # TODO: fix for case X being a dataframe
                 X_test = X[test_index]
                 this_prediction = clf.predict(X_test)
 
@@ -257,20 +258,3 @@ def compare_classifiers(X, y, **kwargs):
 
     return pd.concat(score, axis=1)
 
-
-def batch_train_clfs(X, y, **kwargs):
-    names, classifiers = get_default_clfs()
-
-    models = {}
-    for name, clf in zip(names, classifiers):
-        models[name] = clf.fit(X, y)
-
-    return models
-
-
-def batch_test_clfs(y, models, **kwargs):
-    model_predictions = {}
-    for name, model in models.items():
-        model_predictions[name] = model.predict(y)
-
-    return model_predictions
