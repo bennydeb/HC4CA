@@ -303,7 +303,6 @@ class Experiment(GenericObject):
             self.results = Results(f"Results for {self.description}",
                                    predicts,
                                    scores)
-
         return self
 
     def _get_filename_string(self, path=None, info="score", ext=".csv"):
