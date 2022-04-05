@@ -13,6 +13,7 @@ Results have scores, scoring measures.
 """
 import pandas as pd
 import os
+from typing import TypeVar
 
 from .model_selection import get_default_clfs
 from .data_preprocessing import get_Xy, check_Xy, dummy_preprocessor
@@ -52,7 +53,7 @@ class Results(GenericObject):
     #     return self.scores
 
     def __repr__(self):
-        return f"{self.description}" 
+        return f"{self.description}"
 
     def __str__(self):
         return self.print_results()
@@ -67,8 +68,6 @@ class Results(GenericObject):
     def print_summary(self):
         df = pd.DataFrame(self.scores).T.describe()
         return df
-
-
 
 
 class Dataset(GenericObject):
@@ -174,7 +173,7 @@ class Models(GenericObject):
     def __str__(self):
         string = "\tClassifiers:\n"
         for i, model in enumerate(self.get_names()):
-            string = string + f"{i+1}: {model}\n"
+            string = string + f"{i + 1}: {model}\n"
         return string
 
     def get_clfs(self):
@@ -200,20 +199,24 @@ class Models(GenericObject):
         return predictions
 
 
+data_types = TypeVar('data_types', dict, Dataset)
+
+
 class Experiment(GenericObject):
     """
     General Experiment holder
     """
+
     def __init__(self,
                  description,
-                 data: Dataset = None,
+                 data: data_types = None,
                  models: Models = None,
                  results: Results = None,
                  scoring=('accuracy',),
                  multi_dataset=False,
-                 house = None,
-                 train_set = None,
-                 test_set = None,
+                 house=None,
+                 train_set=None,
+                 test_set=None,
                  uuid_prefix=None,
                  ):
         """
@@ -277,7 +280,7 @@ class Experiment(GenericObject):
             X, y = self.data[self.train_set].get_Xy()
         return X, y
 
-    def get_test_Xy(self ):
+    def get_test_Xy(self):
         if not self.multi_dataset:
             X, y = self.data.get_test_Xy()
         else:
@@ -303,8 +306,7 @@ class Experiment(GenericObject):
 
         return self
 
-
-    def _get_filename_string(self, path=None, info="score", ext = ".csv"):
+    def _get_filename_string(self, path=None, info="score", ext=".csv"):
         t_stamp = get_timestamp()
         filename = ""
 
@@ -312,14 +314,14 @@ class Experiment(GenericObject):
             filename = self.uuid_prefix + "_"
 
         if path is not None:
-            filename = os.path.join(path,filename)
+            filename = os.path.join(path, filename)
 
         if self.house is None:
             hid = self.data.hid
         else:
             hid = self.house
 
-        return filename + str(hid) + "_"+info+"_"+t_stamp+ext
+        return filename + str(hid) + "_" + info + "_" + t_stamp + ext
 
     def to_csv(self, path=None, w_summary=True):
         # set filename
@@ -330,8 +332,7 @@ class Experiment(GenericObject):
         print(f"{filename} written to disk")
 
         if w_summary:
-            filename = self._get_filename_string(path=path,info="summary")
+            filename = self._get_filename_string(path=path, info="summary")
             summary_df = pd.DataFrame(self.results.scores).T.describe()
-            summary_df.to_csv(filename) 
+            summary_df.to_csv(filename)
             print(f"{filename} written to disk")
-
