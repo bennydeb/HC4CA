@@ -166,6 +166,7 @@ def _make_dict(keys, values):
 
 def get_default_clfs(**kwargs):
     n_jobs = kwargs.pop("n_jobs", None)
+    debug = kwargs.pop("debug", False)
 
     names = ["Logistic Regression",
              "Gradient Boosting",
@@ -202,6 +203,20 @@ def get_default_clfs(**kwargs):
              GaussianNB(),
              QuadraticDiscriminantAnalysis()
              ]
+
+    if debug:
+        names = [
+                 "Nearest Neighbors",
+                 "RBF SVM",
+                 "Decision Tree",
+                 "Naive Bayes",
+                 ]
+        funcs = [
+                 KNeighborsClassifier(3),
+                 SVC(C=0.025, ),
+                 DecisionTreeClassifier(max_depth=5),
+                 GaussianNB(),
+                ]
     clfs = _make_dict(names, funcs)
 
     return clfs

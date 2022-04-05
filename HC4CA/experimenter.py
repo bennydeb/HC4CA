@@ -12,9 +12,11 @@ Models have the classifiers, parameters, and models.
 Results have scores, scoring measures.
 """
 import pandas as pd
+import os
 
 from .model_selection import get_default_clfs
 from .data_preprocessing import get_Xy, check_Xy, dummy_preprocessor
+from .utils.common import get_timestamp
 
 from sklearn.exceptions import NotFittedError
 from sklearn.metrics import f1_score, accuracy_score
@@ -50,7 +52,7 @@ class Results(GenericObject):
     #     return self.scores
 
     def __repr__(self):
-        return self.scores
+        return f"{self.description}" 
 
     def __str__(self):
         return self.print_results()
@@ -65,6 +67,8 @@ class Results(GenericObject):
     def print_summary(self):
         df = pd.DataFrame(self.scores).T.describe()
         return df
+
+
 
 
 class Dataset(GenericObject):
@@ -207,8 +211,10 @@ class Experiment(GenericObject):
                  results: Results = None,
                  scoring=('accuracy',),
                  multi_dataset=False,
+                 house = None,
                  train_set = None,
                  test_set = None,
+                 uuid_prefix=None,
                  ):
         """
 
@@ -226,8 +232,10 @@ class Experiment(GenericObject):
         self.results = results
         self.scoring = scoring
         self.multi_dataset = multi_dataset
+        self.house = house
         self.train_set = train_set
         self.test_set = test_set
+        self.uuid_prefix = uuid_prefix
 
     @staticmethod
     def make_score(score, average="micro", **kwargs):
@@ -292,3 +300,38 @@ class Experiment(GenericObject):
             self.results = Results(f"Results for {self.description}",
                                    predicts,
                                    scores)
+
+        return self
+
+
+    def _get_filename_string(self, path=None, info="score", ext = ".csv"):
+        t_stamp = get_timestamp()
+        filename = ""
+
+        if self.uuid_prefix is not None:
+            filename = self.uuid_prefix + "_"
+
+        if path is not None:
+            filename = os.path.join(path,filename)
+
+        if self.house is None:
+            hid = self.data.hid
+        else:
+            hid = self.house
+
+        return filename + str(hid) + "_"+info+"_"+t_stamp+ext
+
+    def to_csv(self, path=None, w_summary=True):
+        # set filename
+        filename = self._get_filename_string(path=path)
+
+        df = pd.DataFrame(self.results.scores)
+        df.to_csv(filename)
+        print(f"{filename} written to disk")
+
+        if w_summary:
+            filename = self._get_filename_string(path=path,info="summary")
+            summary_df = pd.DataFrame(self.results.scores).T.describe()
+            summary_df.to_csv(filename) 
+            print(f"{filename} written to disk")
+
