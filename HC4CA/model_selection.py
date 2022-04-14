@@ -1,3 +1,4 @@
+# TODO: Update module after creating MLChimp
 # def train_test_models(X,y, cv = 5, metrics = ['accuracy',]):
 # Created by benny at 09/11/18
 # Code from: https://scikit-learn.org/stable/
